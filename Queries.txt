@@ -1,0 +1,53 @@
+/*Query 1 - query used for Top Performing Sales Support Agent */
+
+SELECT Employee.EmployeeId, Employee.FirstName||' '||Employee.LastName AS EmployeeName, SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) AS Earnings
+FROM Invoice
+JOIN InvoiceLine
+ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Customer
+ON Customer.CustomerId=Invoice.CustomerId
+JOIN Employee
+ON Employee.EmployeeId=Customer.SupportRepId
+GROUP BY 1,2
+ORDER BY Earnings DESC;
+
+/*Query 2 - query used for Customers Spending levels */
+
+SELECT DISTINCT Customer.CustomerId, SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) AS AmountSpent,
+CASE WHEN SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) >= 40.96 AND SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) < 45.29 THEN 'Middle'
+WHEN SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) >= 45.29 THEN 'Top' 
+ELSE 'Low' END AS CustomerLevel
+FROM Invoice
+JOIN InvoiceLine
+ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Customer
+ON Customer.CustomerId=Invoice.CustomerId
+GROUP BY 1
+ORDER BY 2;
+
+/*Query 3 - query used for Best Media Type */
+
+SELECT MediaType.Name, SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) AS SalesAmount
+FROM InvoiceLine
+JOIN Track
+ON Track.TrackId=InvoiceLine.TrackId
+JOIN MediaType
+ON MediaType.MediaTypeId=Track.MediaTypeId
+group by 1
+order by 2 DESC;
+
+/*Query 4 - query used for the Years where Classical Playlists were Sold */
+
+SELECT Playlist.Name,STRFTIME('%Y', Invoice.InvoiceDate) Year, SUM(InvoiceLine.Quantity) AS Number_of_PL_Sold
+FROM Invoice
+JOIN InvoiceLine
+ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Track
+ON Track.TrackId=InvoiceLine.TrackId
+JOIN PlaylistTrack
+ON PlaylistTrack.TrackId=Track.TrackId
+JOIN Playlist
+ON Playlist.PlaylistId=PlaylistTrack.PlaylistId
+WHERE Playlist.Name = 'Classical'
+GROUP BY 1,2
+
